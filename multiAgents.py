@@ -160,32 +160,28 @@ class MinimaxAgent(MultiAgentSearchAgent):
         "*** YOUR CODE HERE ***"
         
         def minimax(state, depth, agent):
-            if agent == 0:
-                depth -= 1
-            bestMove = None
-            if state.isWin():
-                return float('inf'), bestMove
-            if state.isLose():
-                return float('-inf'), bestMove
-            if depth < 0:
-                return self.evaluationFunction(state), bestMove
             if agent >= state.getNumAgents():
                 agent = 0
+                
+            bestMove = None
             if agent == 0:
+                if depth <= 0 or state.isLose() or state.isWin():
+                    return self.evaluationFunction(state), bestMove
                 bestSoFar = float('-inf')
-            else:
-                bestSoFar = float('inf')
-            for action in state.getLegalActions(agent):
-                nextState = state.generateSuccessor(agent, action)
-                response = minimax(nextState, depth, agent + 1)[0]
-                if agent == 0:
+                for action in state.getLegalActions(agent):
+                    nextState = state.generateSuccessor(agent, action)
+                    response = minimax(nextState, depth - 1, agent + 1)[0]
                     if response > bestSoFar:
-                        bestSoFar = response
-                        bestMove = action
-                else:
+                        bestSoFar, bestMove = response, action
+            else:
+                if depth < 0 or state.isLose() or state.isWin():
+                    return self.evaluationFunction(state), bestMove
+                bestSoFar = float('inf')
+                for action in state.getLegalActions(agent):
+                    nextState = state.generateSuccessor(agent, action)
+                    response = minimax(nextState, depth, agent + 1)[0]
                     if response < bestSoFar:
-                        bestSoFar = response
-                        bestMove = action
+                        bestSoFar, bestMove = response, action
             return bestSoFar, bestMove
             
         return minimax(gameState, self.depth, 0)[1]
