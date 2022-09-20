@@ -242,7 +242,44 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.expectHelper(0, gameState, 0)[1]
+
+    def expectHelper(self, currDepth, gameState, agent):
+        if agent >= gameState.getNumAgents():
+            agent = 0
+
+        if agent == 0:
+            if currDepth >= self.depth or gameState.isLose() or gameState.isWin():
+                return self.evaluationFunction(gameState), None
+
+            return self.maxAgentDecision(currDepth, gameState, agent)
+        else:
+            if currDepth > self.depth or gameState.isLose() or gameState.isWin():
+                return self.evaluationFunction(gameState), None
+
+            return self.minAgentDecision(currDepth, gameState, agent)
+
+    def maxAgentDecision(self, currDepth, gameState, agent):
+        currScore = 0
+        actionToReturn = 0
+        legalActions = gameState.getLegalActions(agent)
+        for action in legalActions:
+            scoreReturned = self.expectHelper(currDepth + 1, gameState.generateSuccessor(agent, action), agent + 1)[0]
+            if scoreReturned >= currScore:
+                actionToReturn = action
+                currScore = scoreReturned
+        return currScore, actionToReturn
+
+    def minAgentDecision(self, currDepth, gameState, agent):
+        legalActions = gameState.getLegalActions(agent)
+        average = 0
+        for action in legalActions:
+            nextState = gameState.generateSuccessor(agent, action)
+            average += self.expectHelper(currDepth, nextState, agent+1)[0] / len(legalActions)
+
+        randomMove = random.randint(0, len(legalActions) - 1)
+        return average, legalActions[randomMove]
+
 
 def betterEvaluationFunction(currentGameState: GameState):
     """
