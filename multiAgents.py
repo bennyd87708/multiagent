@@ -286,42 +286,36 @@ def betterEvaluationFunction(currentGameState: GameState):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: give extra eval for getting closer to food and exponentially good score for being near a ghost if its timer is going, otherwise exponentially bad score for getting near the ghosts otherwise - also give massive score to finishing the game
     """
-    "*** YOUR CODE HERE ***"
     newPos = currentGameState.getPacmanPosition()
     newFood = currentGameState.getFood()
     newGhostStates = currentGameState.getGhostStates()
     newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
+    stayawayconstant = 3
+    getfoodconstant = 5
     deductions = 0
     bonus = 0
-
+    
+    for ghost in newGhostStates:
+        if ghost.scaredTimer == 0:
+            deductions -= (stayawayconstant/max(manhattanDistance(ghost.getPosition(), newPos), 0.1))**2
+        else:
+            bonus += (stayawayconstant/max(manhattanDistance(ghost.getPosition(), newPos), 0.1))**2
+    
     foodList = newFood.asList()
     if len(foodList) == 0:
         return 10000
-    currentGameState.getGhostStates()
-    for ghost in newGhostStates:
-        distanceToGhost = max((manhattanDistance(ghost.getPosition(), newPos)), 0.1)
-        if ghost.scaredTimer == 0:
-            if distanceToGhost < 2:
-                deductions -= (1 / max(distanceToGhost, 0.01))
-        else:
-            bonus += (1/max((manhattanDistance(ghost.getPosition(), newPos)), 0.001)) ** 5
-
-    closest = 100000
-    for food in foodList:
-        if manhattanDistance(food, newPos) < closest:
-            closest = manhattanDistance(food, newPos)
-
-    bonus += (1/(max(closest, 0.01) + len(foodList))) ** 3
-    if distanceToGhost < 1:
-        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-        print(newGhostStates[0].scaredTimer)
-    #print("Pacman position: ", newPos, " Ghost position: ", newGhostStates[0].getPosition(), " Distance to ghost: ",
-          #distanceToGhost, " Closest to food: ", closest, " Bonus: ", bonus,
-          #" Deductions: ", deductions, " Value: ", bonus + deductions)
-    return bonus + deductions
+        
+    closestFoodDistance = manhattanDistance(foodList[0], newPos)
+    for currFood in foodList:
+        currDistance = manhattanDistance(currFood, newPos)
+        if(currDistance < closestFoodDistance):
+            closestFoodDistance = currDistance
+    bonus += getfoodconstant/max(closestFoodDistance, 0.1)
+    
+    return currentGameState.getScore() + deductions + bonus
 
 
 # Abbreviation
