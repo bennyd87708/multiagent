@@ -289,7 +289,40 @@ def betterEvaluationFunction(currentGameState: GameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    newPos = currentGameState.getPacmanPosition()
+    newFood = currentGameState.getFood()
+    newGhostStates = currentGameState.getGhostStates()
+    newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
+
+    deductions = 0
+    bonus = 0
+
+    foodList = newFood.asList()
+    if len(foodList) == 0:
+        return 10000
+    currentGameState.getGhostStates()
+    for ghost in newGhostStates:
+        distanceToGhost = max((manhattanDistance(ghost.getPosition(), newPos)), 0.1)
+        if ghost.scaredTimer == 0:
+            if distanceToGhost < 2:
+                deductions -= (1 / max(distanceToGhost, 0.01))
+        else:
+            bonus += (1/max((manhattanDistance(ghost.getPosition(), newPos)), 0.001)) ** 5
+
+    closest = 100000
+    for food in foodList:
+        if manhattanDistance(food, newPos) < closest:
+            closest = manhattanDistance(food, newPos)
+
+    bonus += (1/(max(closest, 0.01) + len(foodList))) ** 3
+    if distanceToGhost < 1:
+        print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+        print(newGhostStates[0].scaredTimer)
+    #print("Pacman position: ", newPos, " Ghost position: ", newGhostStates[0].getPosition(), " Distance to ghost: ",
+          #distanceToGhost, " Closest to food: ", closest, " Bonus: ", bonus,
+          #" Deductions: ", deductions, " Value: ", bonus + deductions)
+    return bonus + deductions
+
 
 # Abbreviation
 better = betterEvaluationFunction
